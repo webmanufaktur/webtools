@@ -1,0 +1,79 @@
+---
+import Layout from "../layouts/Layout.astro";
+---
+
+<Layout title="JavaScript Cleanup Tool">
+  <main class="max-w-4xl mx-auto p-6">
+    <h1 class="text-3xl font-bold text-center mb-6">JavaScript Cleanup Tool</h1>
+    <div class="flex flex-col gap-6 h-[calc(100vh-12rem)]">
+      <div class="flex-1 flex flex-col">
+        <label for="js-input" class="mb-2 font-semibold"
+          >Input JavaScript:</label
+        >
+        <textarea
+          id="js-input"
+          class="flex-1 p-3 border border-gray-300 rounded-md resize-none font-mono text-sm"
+          placeholder="Paste your JavaScript here"></textarea>
+      </div>
+      <div class="flex-1 flex flex-col">
+        <label for="cleaned-output" class="mb-2 font-semibold"
+          >Cleaned Output:</label
+        >
+        <textarea
+          id="cleaned-output"
+          class="flex-1 p-3 border border-gray-300 rounded-md resize-none font-mono text-sm"
+          readonly></textarea>
+      </div>
+    </div>
+  </main>
+</Layout>
+
+<script>
+  const jsInput = document.getElementById("js-input") as HTMLTextAreaElement;
+  const cleanedOutput = document.getElementById(
+    "cleaned-output"
+  ) as HTMLTextAreaElement;
+
+  function cleanJavaScript(js: string): string {
+    // Remove single-line comments
+    js = js.replace(/\/\/.*/g, "");
+
+    // Remove multi-line comments
+    js = js.replace(/\/\*[\s\S]*?\*\//g, "");
+
+    // Remove line breaks and unnecessary spaces
+    js = js.replace(/\s+/g, " ");
+
+    // Remove spaces before and after parentheses, brackets, and operators
+    js = js.replace(/\s*([\(\)\{\}\[\]\+\-\*\/\%\=\<\>\&\|\,\;])\s*/g, "$1");
+
+    // Add space after keywords
+    js = js.replace(
+      /(if|for|while|switch|catch|function|return|var|let|const)\(/g,
+      "$1 ("
+    );
+
+    // Remove spaces at the beginning and end of the string
+    js = js.trim();
+
+    // Add newline after semicolons for readability (optional)
+    // js = js.replace(/;/g, ";\n");
+
+    return js;
+  }
+
+  function updateCleanedJs() {
+    const inputJs = jsInput.value;
+    const cleanedJs = cleanJavaScript(inputJs);
+    cleanedOutput.value = cleanedJs;
+  }
+
+  let debounceTimer: number;
+  jsInput.addEventListener("input", () => {
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(updateCleanedJs, 300) as unknown as number;
+  });
+
+  // Initial cleanup (if needed)
+  updateCleanedJs();
+</script>

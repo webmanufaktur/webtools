@@ -1,0 +1,68 @@
+---
+import Layout from "../layouts/Layout.astro";
+---
+
+<Layout title="CSS Cleanup Tool">
+  <main class="max-w-4xl mx-auto p-6">
+    <h1 class="text-3xl font-bold text-center mb-6">CSS Cleanup Tool</h1>
+    <div class="flex flex-col gap-6 h-[calc(100vh-12rem)]">
+      <div class="flex-1 flex flex-col">
+        <label for="css-input" class="mb-2 font-semibold">Input CSS:</label>
+        <textarea
+          id="css-input"
+          class="flex-1 p-3 border border-gray-300 rounded-md resize-none font-mono text-sm"
+          placeholder="Paste your CSS here"></textarea>
+      </div>
+      <div class="flex-1 flex flex-col">
+        <label for="cleaned-output" class="mb-2 font-semibold"
+          >Cleaned Output:</label
+        >
+        <textarea
+          id="cleaned-output"
+          class="flex-1 p-3 border border-gray-300 rounded-md resize-none font-mono text-sm"
+          readonly></textarea>
+      </div>
+    </div>
+  </main>
+</Layout>
+
+<script>
+  const cssInput = document.getElementById("css-input") as HTMLTextAreaElement;
+  const cleanedOutput = document.getElementById(
+    "cleaned-output"
+  ) as HTMLTextAreaElement;
+
+  function cleanCss(css: string): string {
+    // Remove comments
+    css = css.replace(/\/\*[\s\S]*?\*\//g, "");
+
+    // Remove line breaks and unnecessary spaces
+    css = css.replace(/\s+/g, " ");
+
+    // Remove spaces before and after brackets, colons, and semicolons
+    css = css.replace(/\s*([\{\}\:\;\,])\s*/g, "$1");
+
+    // Add line break after closing curly brace for readability
+    // css = css.replace(/\}/g, "}\n");
+
+    // Remove spaces at the beginning and end of the string
+    css = css.trim();
+
+    return css;
+  }
+
+  function updateCleanedCss() {
+    const inputCss = cssInput.value;
+    const cleanedCss = cleanCss(inputCss);
+    cleanedOutput.value = cleanedCss;
+  }
+
+  let debounceTimer: number;
+  cssInput.addEventListener("input", () => {
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(updateCleanedCss, 300) as unknown as number;
+  });
+
+  // Initial cleanup (if needed)
+  updateCleanedCss();
+</script>

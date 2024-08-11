@@ -1,0 +1,92 @@
+---
+import Layout from "../layouts/Layout.astro";
+---
+
+<Layout title="Markdown to HTML Converter">
+  <main class="max-w-7xl mx-auto p-6">
+    <h1 class="text-3xl font-bold text-center mb-6">
+      Markdown to HTML Converter
+    </h1>
+    <div class="flex gap-6 h-[calc(100vh-12rem)]">
+      <textarea
+        id="markdown-input"
+        class="flex-1 p-3 border border-gray-300 rounded-md resize-none font-mono text-sm"
+        placeholder="Enter your Markdown here"></textarea>
+      <div
+        class="flex-1 border border-gray-300 rounded-md overflow-hidden flex flex-col bg-white"
+      >
+        <div class="flex bg-gray-200">
+          <button
+            id="rendered-tab"
+            class="flex-1 py-2 px-4 font-semibold bg-white">Rendered</button
+          >
+          <button id="source-tab" class="flex-1 py-2 px-4">HTML Source</button>
+        </div>
+        <div id="rendered-output" class="p-3 flex-1 overflow-y-auto prose">
+        </div>
+        <textarea
+          id="html-output"
+          class="hidden p-3 w-full flex-1 resize-none border-none font-mono text-sm"
+        ></textarea>
+      </div>
+    </div>
+  </main>
+</Layout>
+<script>
+  import { marked } from "marked";
+  import DOMPurify from "dompurify";
+
+  const markdownInput = document.getElementById(
+    "markdown-input"
+  ) as HTMLTextAreaElement;
+  const renderedOutput = document.getElementById(
+    "rendered-output"
+  ) as HTMLDivElement;
+  const htmlOutput = document.getElementById(
+    "html-output"
+  ) as HTMLTextAreaElement;
+  const renderedTab = document.getElementById(
+    "rendered-tab"
+  ) as HTMLButtonElement;
+  const sourceTab = document.getElementById("source-tab") as HTMLButtonElement;
+
+  async function convertMarkdownToHtml() {
+    const markdown = markdownInput.value;
+    try {
+      const html = await marked(markdown);
+      const sanitizedHtml = DOMPurify.sanitize(html);
+      renderedOutput.innerHTML = sanitizedHtml;
+      htmlOutput.value = sanitizedHtml;
+    } catch (error) {
+      console.error("Error converting Markdown to HTML:", error);
+      renderedOutput.innerHTML = "<p>Error converting Markdown to HTML</p>";
+      htmlOutput.value = "<p>Error converting Markdown to HTML</p>";
+    }
+  }
+
+  markdownInput.addEventListener("input", () => {
+    convertMarkdownToHtml();
+  });
+
+  htmlOutput.addEventListener("input", () => {
+    const sanitizedHtml = DOMPurify.sanitize(htmlOutput.value);
+    renderedOutput.innerHTML = sanitizedHtml;
+  });
+
+  renderedTab.addEventListener("click", () => {
+    renderedOutput.classList.remove("hidden");
+    htmlOutput.classList.add("hidden");
+    renderedTab.classList.add("bg-white", "font-semibold");
+    sourceTab.classList.remove("bg-white", "font-semibold");
+  });
+
+  sourceTab.addEventListener("click", () => {
+    renderedOutput.classList.add("hidden");
+    htmlOutput.classList.remove("hidden");
+    sourceTab.classList.add("bg-white", "font-semibold");
+    renderedTab.classList.remove("bg-white", "font-semibold");
+  });
+
+  // Initial conversion
+  convertMarkdownToHtml();
+</script>

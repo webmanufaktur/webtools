@@ -1,0 +1,47 @@
+---
+export interface Props {
+  title: string;
+}
+
+const { title } = Astro.props;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="generator" content={Astro.generator} />
+    <title>{title}</title>
+  </head>
+  <body class="bg-gray-100 text-gray-900 dark:bg-gray-900 dark:text-white">
+    <nav class="flex gap-2 p-4 justify-center">
+      <a
+        class="bg-white border py-1.5 px-3 text-xs rounded hover:bg-teal-700 hover:text-white"
+        href="/">Home</a
+      >
+      <a
+        class="bg-white border py-1.5 px-3 text-xs rounded hover:bg-teal-700 hover:text-white"
+        href="/js-minifier/">Minify JS</a
+      >
+      <a
+        class="bg-white border py-1.5 px-3 text-xs rounded hover:bg-teal-700 hover:text-white"
+        href="/css-minifier/">Minify CSS</a
+      >
+      <a
+        class="bg-white border py-1.5 px-3 text-xs rounded hover:bg-teal-700 hover:text-white"
+        href="/html-minifier/">Minify HTML</a
+      >
+      <a
+        class="bg-white border py-1.5 px-3 text-xs rounded hover:bg-teal-700 hover:text-white"
+        href="/markdown-to-html/">Markdown to HTML</a
+      >
+      <a
+        class="bg-white border py-1.5 px-3 text-xs rounded hover:bg-teal-700 hover:text-white"
+        href="/html-to-markdown/">HTML to Markdown</a
+      >
+    </nav>
+    <slot />
+  </body>
+</html>

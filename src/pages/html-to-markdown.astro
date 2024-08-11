@@ -1,0 +1,131 @@
+---
+import Layout from "../layouts/Layout.astro";
+---
+
+<Layout title="HTML to Markdown Converter">
+  <main class="max-w-7xl mx-auto p-6">
+    <h1 class="text-3xl font-bold text-center mb-6">
+      HTML to Markdown Converter
+    </h1>
+    <div class="flex gap-6 h-[calc(100vh-12rem)]">
+      <div
+        class="flex-1 border border-gray-300 rounded-md overflow-hidden flex flex-col"
+      >
+        <div class="flex bg-gray-100">
+          <button id="html-tab" class="flex-1 py-2 px-4 font-semibold bg-white"
+            >HTML Source</button
+          >
+          <button id="rendered-tab" class="flex-1 py-2 px-4"
+            >Rendered HTML</button
+          >
+        </div>
+        <textarea
+          id="html-input"
+          class="p-3 w-full flex-1 resize-none border-none"
+          placeholder="Enter your HTML here"></textarea>
+        <div id="rendered-html" class="hidden p-3 flex-1 overflow-y-auto prose">
+        </div>
+      </div>
+      <textarea
+        id="markdown-output"
+        class="flex-1 p-3 border border-gray-300 rounded-md resize-none"
+        readonly></textarea>
+    </div>
+  </main>
+</Layout>
+
+<script>
+  import TurndownService from "turndown";
+
+  const htmlInput = document.getElementById(
+    "html-input"
+  ) as HTMLTextAreaElement;
+  const renderedHtml = document.getElementById(
+    "rendered-html"
+  ) as HTMLDivElement;
+  const markdownOutput = document.getElementById(
+    "markdown-output"
+  ) as HTMLTextAreaElement;
+  const htmlTab = document.getElementById("html-tab") as HTMLButtonElement;
+  const renderedTab = document.getElementById(
+    "rendered-tab"
+  ) as HTMLButtonElement;
+
+  const turndownService = new TurndownService({
+    headingStyle: "atx",
+    codeBlockStyle: "fenced",
+  });
+
+  // Customize heading conversion
+  turndownService.addRule("heading", {
+    filter: ["h1", "h2", "h3", "h4", "h5", "h6"],
+    replacement: function (content, node) {
+      const hLevel = Number(node.nodeName.charAt(1));
+      return "\n\n" + "#".repeat(hLevel) + " " + content + "\n\n";
+    },
+  });
+
+  turndownService.addRule("tableCell", {
+    filter: ["th", "td"],
+    replacement: function (content) {
+      return " " + content.trim() + " |";
+    },
+  });
+
+  turndownService.addRule("tableRow", {
+    filter: "tr",
+    replacement: function (content, node) {
+      let output = "|" + content.trim() + "\n";
+      if (node.parentNode && node.parentNode.nodeName === "THEAD") {
+        const cellCount = node.childNodes.length;
+        output += "|" + " --- |".repeat(cellCount) + "\n";
+      }
+      return output;
+    },
+  });
+
+  turndownService.addRule("table", {
+    filter: "table",
+    replacement: function (content) {
+      // Remove any extra newlines between rows
+      content = content.replace(/\n+/g, "\n");
+      return "\n" + content.trim() + "\n\n";
+    },
+  });
+
+  function convertHtmlToMarkdown() {
+    const html = htmlInput.value;
+    try {
+      const markdown = turndownService.turndown(html);
+      markdownOutput.value = markdown.trim();
+      renderedHtml.innerHTML = html;
+    } catch (error) {
+      console.error("Error converting HTML to Markdown:", error);
+      markdownOutput.value = "Error converting HTML to Markdown";
+      renderedHtml.innerHTML = "<p>Error rendering HTML</p>";
+    }
+  }
+
+  let debounceTimer: number;
+  htmlInput.addEventListener("input", () => {
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(convertHtmlToMarkdown, 300) as unknown as number;
+  });
+
+  htmlTab.addEventListener("click", () => {
+    htmlInput.classList.remove("hidden");
+    renderedHtml.classList.add("hidden");
+    htmlTab.classList.add("bg-white", "font-semibold");
+    renderedTab.classList.remove("bg-white", "font-semibold");
+  });
+
+  renderedTab.addEventListener("click", () => {
+    htmlInput.classList.add("hidden");
+    renderedHtml.classList.remove("hidden");
+    renderedTab.classList.add("bg-white", "font-semibold");
+    htmlTab.classList.remove("bg-white", "font-semibold");
+  });
+
+  // Initial conversion
+  convertHtmlToMarkdown();
+</script>
